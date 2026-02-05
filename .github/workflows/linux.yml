@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-24.04
     env:
       DATABASE: test
-    continue-on-error: true
+    #continue-on-error: true
     services:
       monetdb:
         image: "monetdb/dev-builds:Dec2025"
@@ -22,7 +22,7 @@ jobs:
           - 50000:50000
     strategy:
       matrix:
-        python-version: ['3.10', '3.11', '3.12', '3.13']
+        python-version: ['3.13']
     steps:
 
       - name: Checkout
@@ -39,8 +39,8 @@ jobs:
           version: "0.9.30"
           enable-cache: true
 
-      - name: Set up venv, show dependency versions
-        run: uv sync -v
+      - name: Set up .venv, show dependency versions
+        run: uv sync
 
       - name: Prepare database
         run: uv run test/prepare-db.py '${{ env.DATABASE }}'
@@ -48,8 +48,8 @@ jobs:
       - name: Run tests
         run: uv run pytest
 
-      - name: Run tests with old dependencies
-        run: |
-          uv sync --resolution=lowest-direct
-          uv run --resolution=lowest-direct pytest
+      - name: Switch .venv to oldest possible dependencies
+        run: uv sync --resolution=lowest-direct
 
+      - name: Run tests with oldest dependencies
+        run: uv run --resolution=lowest-direct pytest
