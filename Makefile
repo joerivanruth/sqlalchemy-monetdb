@@ -1,22 +1,20 @@
-venv/:
-	python3 -m venv venv
-	venv/bin/pip install --upgrade pip wheel setuptools
+# Makefile so you don't have to remember the exact commands
 
-venv/bin/pytest: venv/
-	venv/bin/pip install -e ".[test]"
+build: ux
+	uv build
 
-pytest: venv/bin/pytest
-	venv/bin/pytest -r A
+pytest:
+	uv run pytest -r A
+
+# untested
+upload:
+	uv run twine upload dist/*.whl dist/*.tar.gz
 
 
-venv/bin/twine: venv/
-	venv/bin/pip install twine
+#######################################################################
+# Aliases for backward compatibility
+#######################################################################
 
-sdist: venv/
-	venv/bin/python setup.py build sdist
+sdist: build
 
-wheel: venv/
-	venv/bin/python setup.py build bdist_wheel
-
-upload: venv/bin/twine wheel sdist
-	venv/bin/twine upload dist/*.whl dist/*.tar.gz
+wheel: build
